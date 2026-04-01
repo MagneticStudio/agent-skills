@@ -1,20 +1,18 @@
 ---
 name: codebase-onboarding
-description: Analyze an unfamiliar codebase and generate a structured onboarding guide with architecture map, key entry points, conventions, and a starter CLAUDE.md. Use when joining a new project or setting up Claude Code for the first time in a repo.
-origin: ECC
+description: Analyze an unfamiliar codebase and generate a shareable architecture overview and onboarding guide with tech stack, architecture map, key entry points, directory map, and conventions. Use when joining a new project or wanting to understand a codebase.
 ---
 
 # Codebase Onboarding
 
-Systematically analyze an unfamiliar codebase and produce a structured onboarding guide. Designed for developers joining a new project or setting up Claude Code in an existing repo for the first time.
+Systematically analyze an unfamiliar codebase and produce a shareable onboarding guide — a high-level architecture overview suitable for new developers joining the project.
 
 ## When to Use
 
-- First time opening a project with Claude Code
 - Joining a new team or repository
 - User asks "help me understand this codebase"
-- User asks to generate a CLAUDE.md for a project
 - User says "onboard me" or "walk me through this repo"
+- User wants a shareable architecture overview or README-style summary
 
 ## How It Works
 
@@ -56,7 +54,7 @@ From the reconnaissance data, identify:
 - Framework(s) and major libraries
 - Database(s) and ORMs
 - Build tools and bundlers
-- CI/CD platform
+- CI/CD: note the platform (e.g. GitHub Actions) and describe workflows at a high level (e.g. "runs tests on PR, deploys to staging on merge") — do not include workflow file names, job names, or step-level details
 
 **Architecture Pattern**
 - Monolith, monorepo, microservices, or serverless
@@ -104,11 +102,9 @@ Identify patterns the codebase already follows:
 - PR workflow (squash, merge, rebase)
 - If the repo has no commits yet or only a shallow history (e.g. `git clone --depth 1`), skip this section and note "Git history unavailable or too shallow to detect conventions"
 
-### Phase 4: Generate Onboarding Artifacts
+### Phase 4: Generate Onboarding Guide
 
-Produce two outputs:
-
-#### Output 1: Onboarding Guide
+Produce a single output: a shareable onboarding guide. Do NOT generate or modify a CLAUDE.md file.
 
 ```markdown
 # Onboarding Guide: [Project Name]
@@ -117,24 +113,17 @@ Produce two outputs:
 [2-3 sentences: what this project does and who it serves]
 
 ## Tech Stack
-<!-- Example for a Next.js project — replace with detected stack -->
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| Language | TypeScript | 5.x |
-| Framework | Next.js | 14.x |
-| Database | PostgreSQL | 16 |
-| ORM | Prisma | 5.x |
-| Testing | Jest + Playwright | - |
+| ... | ... | ... |
 
 ## Architecture
-[Diagram or description of how components connect]
+[ASCII diagram or description of how components connect.
+Include deployment targets where known (e.g. "Deployed on Vercel", "Runs on Railway").]
 
 ## Key Entry Points
-<!-- Example for a Next.js project — replace with detected paths -->
-- **API routes**: `src/app/api/` — Next.js route handlers
-- **UI pages**: `src/app/(dashboard)/` — authenticated pages
-- **Database**: `prisma/schema.prisma` — data model source of truth
-- **Config**: `next.config.ts` — build and runtime config
+- **[Component]**: `path/` — what it does
+- ...
 
 ## Directory Map
 [Top-level directory → purpose mapping]
@@ -148,69 +137,47 @@ Produce two outputs:
 - [Testing patterns]
 - [Git workflow]
 
-## Common Tasks
-<!-- Example for a Node.js project — replace with detected commands -->
-- **Run dev server**: `npm run dev`
-- **Run tests**: `npm test`
-- **Run linter**: `npm run lint`
-- **Database migrations**: `npx prisma migrate dev`
-- **Build for production**: `npm run build`
-
-## Where to Look
-<!-- Example for a Next.js project — replace with detected paths -->
-| I want to... | Look at... |
-|--------------|-----------|
-| Add an API endpoint | `src/app/api/` |
-| Add a UI page | `src/app/(dashboard)/` |
-| Add a database table | `prisma/schema.prisma` |
-| Add a test | `tests/` matching the source path |
-| Change build config | `next.config.ts` |
-```
-
-#### Output 2: Starter CLAUDE.md
-
-Generate or update a project-specific CLAUDE.md based on detected conventions. If `CLAUDE.md` already exists, read it first and enhance it — preserve existing project-specific instructions and clearly call out what was added or changed.
-
-```markdown
-# Project Instructions
-
-## Tech Stack
-[Detected stack summary]
-
 ## Code Style
 - [Detected naming conventions]
 - [Detected patterns to follow]
 
 ## Testing
-- Run tests: `[detected test command]`
-- Test pattern: [detected test file convention]
-- Coverage: [if configured, the coverage command]
+- [Test runner and framework (e.g. "Bun's native test runner for unit/integration, Playwright for E2E")]
+- [Test file conventions (e.g. "*.test.ts, *.spec.ts")]
+- [Testing patterns (e.g. "isolated DB containers for integration tests", "fixtures over mocks")]
 
 ## Build & Run
-- Dev: `[detected dev command]`
-- Build: `[detected build command]`
-- Lint: `[detected lint command]`
+- [Build tooling (e.g. "Vite for dev/bundling, Bun for script execution")]
+- [Runtime architecture (e.g. "Docker Compose for local dev services", "Electron Forge for desktop builds")]
+- [Notable patterns (e.g. "Vite proxies API calls in dev", "monorepo workspace builds")]
 
-## Project Structure
-[Key directory → purpose map]
+## Where to Look
+[Architecture-oriented navigation only. Focus on where code for major
+concerns lives in the repo (API layer, UI, data model, auth, etc.).
+Omit operational entries like CI config paths or deployment config files.]
 
-## Conventions
-- [Commit style if detectable]
-- [PR workflow if detectable]
-- [Error handling patterns]
+| I want to understand... | Look at... |
+|------------------------|-----------|
+| API layer | `src/api/` |
+| Data model | `src/db/schema/` |
+| Auth | `src/auth/` |
+| UI components | `src/components/` |
 ```
 
 ## Best Practices
 
 1. **Don't read everything** — reconnaissance should use Glob and Grep, not Read on every file. Read selectively only for ambiguous signals.
 2. **Verify, don't guess** — if a framework is detected from config but the actual code uses something different, trust the code.
-3. **Respect existing CLAUDE.md** — if one already exists, enhance it rather than replacing it. Call out what's new vs existing.
-4. **Stay concise** — the onboarding guide should be scannable in 2 minutes. Details belong in the code, not the guide.
-5. **Flag unknowns** — if a convention can't be confidently detected, say so rather than guessing. "Could not determine test runner" is better than a wrong answer.
+3. **Stay high-level** — the guide should be scannable in 2 minutes. Focus on architecture and structure, not operational commands.
+4. **Flag unknowns** — if a convention can't be confidently detected, say so rather than guessing. "Could not determine test runner" is better than a wrong answer.
+5. **Keep it shareable** — this guide should be appropriate to share with anyone. Avoid exposing CI/CD workflow internals, env var names, or bypass flags.
 
 ## Anti-Patterns to Avoid
 
-- Generating a CLAUDE.md that's longer than 100 lines — keep it focused
+- Generating or modifying a CLAUDE.md — this skill only produces the onboarding guide
+- Including a "Common Tasks" section with specific commands — that's operational detail, not architecture
+- Listing CI workflow file names, job names, or step-level details — just describe what CI does at a high level
+- Including "Where to Look" entries for operational concerns (CI config, deployment config, build scripts) — keep it architecture-focused
 - Listing every dependency — highlight only the ones that shape how you write code
 - Describing obvious directory names — `src/` doesn't need an explanation
 - Copying the README — the onboarding guide adds structural insight the README lacks
@@ -219,15 +186,10 @@ Generate or update a project-specific CLAUDE.md based on detected conventions. I
 
 ### Example 1: First time in a new repo
 **User**: "Onboard me to this codebase"
-**Action**: Run full 4-phase workflow → produce Onboarding Guide + Starter CLAUDE.md
-**Output**: Onboarding Guide printed directly to the conversation, plus a `CLAUDE.md` written to the project root
+**Action**: Run full 4-phase workflow → produce Onboarding Guide
+**Output**: Onboarding Guide printed directly to the conversation
 
-### Example 2: Generate CLAUDE.md for existing project
-**User**: "Generate a CLAUDE.md for this project"
-**Action**: Run Phases 1-3, skip Onboarding Guide, produce only CLAUDE.md
-**Output**: Project-specific `CLAUDE.md` with detected conventions
-
-### Example 3: Enhance existing CLAUDE.md
-**User**: "Update the CLAUDE.md with current project conventions"
-**Action**: Read existing CLAUDE.md, run Phases 1-3, merge new findings
-**Output**: Updated `CLAUDE.md` with additions clearly marked
+### Example 2: Architecture overview
+**User**: "Give me an architecture overview of this project"
+**Action**: Run Phases 1-3, produce Onboarding Guide focused on architecture and tech stack
+**Output**: High-level onboarding guide emphasizing structure and data flow
